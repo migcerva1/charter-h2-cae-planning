@@ -1035,7 +1035,6 @@
       </div>
       <h1 class="app-title" id="appTitle">[Internal] Charter H2 2026 CAE planning</h1>
       <div class="topbar-links">
-
         <a
           class="btn btn-primary topbar-link"
           id="caeWorkbookLink"
@@ -1049,7 +1048,6 @@
           </svg>
           <span>Charter Issues Tracker</span>
         </a>
-        
         <a
           class="btn btn-primary topbar-link"
           id="caePlaybookLink"
@@ -1064,7 +1062,6 @@
           </svg>
           <span>Charter CAE Playbook</span>
         </a>
-
       </div>
       <div class="topbar-actions">
         <div class="search-wrap">
@@ -1107,7 +1104,7 @@
           <div class="profile-widget">
             <div class="avatar-lg" id="profileAvatar"></div>
             <div class="profile-greeting">
-              <h2 id="profileGreeting">Hello—</h2>
+              <h2 id="profileGreeting">Hello, —</h2>
               <p id="profileRole">—</p>
             </div>
           </div>
@@ -1540,19 +1537,25 @@ function renderAppTitle() {
 }
 
 function renderTopbarLinks() {
-  const playbook = document.getElementById('caePlaybookLink');
-  if (playbook && data.caePlaybook) {
-    playbook.href = data.caePlaybook.url;
-    playbook.title = 'Open ' + (data.caePlaybook.label || 'CAE Playbook') + ' in SharePoint';
-    const label = playbook.querySelector('span');
-    if (label) label.textContent = data.caePlaybook.label || 'Charter CAE Playbook';
-  }
+  const container = document.querySelector('.topbar-links');
   const workbook = document.getElementById('caeWorkbookLink');
+  const playbook = document.getElementById('caePlaybookLink');
+
+  if (container && workbook && playbook && workbook.compareDocumentPosition(playbook) & Node.DOCUMENT_POSITION_PRECEDING) {
+    container.insertBefore(workbook, playbook);
+  }
+
   if (workbook && data.caeWorkbook) {
     workbook.href = data.caeWorkbook.url;
     workbook.title = 'Open ' + (data.caeWorkbook.label || 'Charter Issues Tracker') + ' in SharePoint';
     const label = workbook.querySelector('span');
     if (label) label.textContent = data.caeWorkbook.label || 'Charter Issues Tracker';
+  }
+  if (playbook && data.caePlaybook) {
+    playbook.href = data.caePlaybook.url;
+    playbook.title = 'Open ' + (data.caePlaybook.label || 'CAE Playbook') + ' in SharePoint';
+    const label = playbook.querySelector('span');
+    if (label) label.textContent = data.caePlaybook.label || 'Charter CAE Playbook';
   }
 }
 
@@ -1560,7 +1563,7 @@ function renderProfile() {
   const { name, role, initials } = data.profile;
   document.getElementById('profileAvatar').textContent = initials;
   document.getElementById('topAvatar').textContent = initials;
-  document.getElementById('profileGreeting').textContent = 'Hello';
+  document.getElementById('profileGreeting').textContent = 'Hello, ' + name;
   document.getElementById('profileRole').textContent = role;
 }
 
