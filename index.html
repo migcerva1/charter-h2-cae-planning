@@ -1104,7 +1104,7 @@
           <div class="profile-widget">
             <div class="avatar-lg" id="profileAvatar"></div>
             <div class="profile-greeting">
-              <h2 id="profileGreeting">Hello, —</h2>
+              <h2 id="profileGreeting">Hello—</h2>
               <p id="profileRole">—</p>
             </div>
           </div>
@@ -1563,7 +1563,7 @@ function renderProfile() {
   const { name, role, initials } = data.profile;
   document.getElementById('profileAvatar').textContent = initials;
   document.getElementById('topAvatar').textContent = initials;
-  document.getElementById('profileGreeting').textContent = 'Hello, ' + name;
+  document.getElementById('profileGreeting').textContent = 'Hello';
   document.getElementById('profileRole').textContent = role;
 }
 
