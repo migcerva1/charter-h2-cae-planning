@@ -34,9 +34,6 @@
     .body{display:flex;flex:1;min-height:0}
     .content{flex:1;padding:24px 28px 32px;overflow-y:auto}
     .hero-line{font-size:13px;color:var(--muted);margin-bottom:18px;max-width:520px}
-    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-    .filter-pill{padding:7px 14px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid var(--glass-border);background:transparent;color:var(--muted);cursor:pointer;font:inherit}
-    .filter-pill.active{background:rgba(147,51,234,.35);border-color:rgba(168,85,247,.5);color:var(--text)}
     .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
     .card{background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--radius);padding:18px 18px 14px;position:relative;content-visibility:auto;contain-intrinsic-size:220px}
     .card.done{opacity:.65}
@@ -133,7 +130,6 @@
         <div class="body">
           <main class="content">
             <p class="hero-line" contenteditable="true" id="pageTitle" data-persist="ui" data-placeholder="Subtitle">Adoption proposals · T-Mobile · click any tile to edit</p>
-            <div class="filters" id="filters"></div>
             <div class="cards" id="cards"></div>
             <section class="timeline">
               <div class="timeline-title">Project timeline</div>
@@ -189,7 +185,6 @@
       {id:"t6",tags:["Enablement","In progress"],title:"Pending items for Sam",note:"What Sam owns vs what we handle in background.",steps:["Build shared list","Weekly update"],owner:"Adoption",date:"2026-06-24"}
     ],
     chart:[{month:"Mar",value:"40"},{month:"Apr",value:"44"},{month:"May",value:"48"},{month:"Jun",value:"52"}],
-    filter:"All",
     ui:JSON.parse(JSON.stringify(DEFAULT_UI))
   };
 
@@ -213,7 +208,7 @@
         data.topics=(data.topics||[]).map(normalizeTopic);
         delete data.week;
         if(!data.chart)data.chart=JSON.parse(JSON.stringify(DEFAULT_DATA.chart));
-        if(!data.filter)data.filter="All";
+        delete data.filter;
         return data;
       }
     }catch(e){}
@@ -367,21 +362,11 @@
   function filteredTopics(){
     const q=document.getElementById("searchInput").value.trim().toLowerCase();
     let list=state.topics;
-    if(state.filter!=="All")list=list.filter(t=>topicTags(t).includes(state.filter));
     if(q)list=list.filter(t=>{
       const blob=[t.title,t.note,t.owner,t.date,...topicTags(t)].join(" ").toLowerCase();
       return blob.includes(q);
     });
     return list;
-  }
-
-  function renderFilters(){
-    const el=document.getElementById("filters");
-    const filters=["All","Open","In progress","With Sam","Done"];
-    el.innerHTML=filters.map(f=>{
-      const label=f==="All"?`All (${state.topics.length})`:f;
-      return`<button class="filter-pill${state.filter===f?" active":""}" data-filter="${f}" type="button">${label}</button>`;
-    }).join("");
   }
 
   function cardHtml(t){
@@ -549,22 +534,12 @@
   }
 
   function onClick(e){
-    const f=e.target.closest("[data-filter]");
-    if(f){
-      flushSave();
-      state.filter=f.dataset.filter;
-      renderFilters();
-      renderCards();
-      scheduleSave();
-      return;
-    }
     const del=e.target.closest("[data-delete]");
     if(del){
       if(!confirm("Remove this topic?"))return;
       scrapeTopics();
       state.topics=state.topics.filter(t=>t.id!==del.dataset.delete);
       rebuildTopicMap();
-      renderFilters();
       renderCards();
       updateStats();
       renderTimeline();
@@ -606,8 +581,6 @@
     const id="t"+Date.now();
     state.topics.unshift({id,tags:["Planning","Open"],title:"New adoption topic",note:"Click to edit description.",steps:["Next step 1","Next step 2"],owner:"Adoption",date:todayIso()});
     topicMap.set(id,state.topics[0]);
-    state.filter="All";
-    renderFilters();
     renderCards();
     updateStats();
     renderTimeline();
@@ -633,11 +606,10 @@
         const data=mergeUi(JSON.parse(reader.result));
         data.topics=(data.topics||[]).map(normalizeTopic);
         if(!data.chart)data.chart=JSON.parse(JSON.stringify(DEFAULT_DATA.chart));
-        if(!data.filter)data.filter="All";
+        delete data.filter;
         state=data;
         rebuildTopicMap();
         applyUi();
-        renderFilters();
         renderCards();
         updateStats();
         renderTimeline();
@@ -654,7 +626,6 @@
   function init(){
     rebuildTopicMap();
     applyUi();
-    renderFilters();
     renderCards();
     buildStatsOnce();
     updateStats();
